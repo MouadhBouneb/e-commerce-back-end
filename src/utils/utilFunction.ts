@@ -2,6 +2,7 @@
 
 import { diskStorage } from "multer";
 import { extname } from "path";
+import * as fs from 'fs';
 
 export const storageArticle = diskStorage({
   destination: './uploads/articles',
@@ -20,3 +21,4 @@ export const storageDocuments = diskStorage({
 function generateFilename(file) {
   return `${Date.now()}${extname(file.originalname)}`;
 }
+

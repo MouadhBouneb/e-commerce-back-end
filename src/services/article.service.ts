@@ -65,9 +65,18 @@ export class ArticleService {
     try {
       console.log(articleParams);
 
-      const categorie = await this.categorieRepository.findOneBy({
-        id: articleParams.categorie,
+      const categorie = await this.categorieRepository.findOne({
+        where: {
+          id: articleParams.categorie,
+        },
+        relations: ['suc_categories'],
       });
+      if (categorie?.suc_categories?.length > 0) {
+        throw new HttpException(
+          'cette categorie ne peux pas contient des articles',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       const lastArticle = await this.artcileRepository.findOne({
         where: {
           /* You can leave this empty or add your own conditions */
@@ -114,7 +123,13 @@ export class ArticleService {
       // newlog.user=new User()
       // this.log.create(newlog)
       console.log(error);
-      throw new HttpException('qsd', HttpStatus.BAD_REQUEST);
+      if (error) {
+        throw new HttpException(error.response, HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
   async update(id: number, articleParams: CreateArticleParams) {
@@ -173,13 +188,29 @@ export class ArticleService {
     return articledesable.affected == 0 ? false : true;
   }
   async delete(id: number) {
+    const article = await this.artcileRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: ['images'],
+    });
+    if (article?.images?.length > 0) {
+      article.images.forEach(async (element) => {
+        await fs.unlink('uploads/articles/' + element.f_name, (err) => {
+          if (err) {
+            console.error(err);
+            return err;
+          }
+        });
+      });
+    }
     const articledeleted = await this.artcileRepository.delete({ id: id });
     return articledeleted.affected == 0 ? false : true;
   }
 
-  async deleteImage(id: number, idImage: number) {
+  async deleteImage( idImage: number) {
     const file = await this.FileRepository.findOneBy({ id: idImage });
-    await fs.unlink('../../uploads/articles/' + file.f_name, (err) => {
+    await fs.unlink('uploads/articles/' + file.f_name, (err) => {
       if (err) {
         console.error(err);
         return err;

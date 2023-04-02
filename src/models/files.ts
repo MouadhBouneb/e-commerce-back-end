@@ -8,10 +8,13 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   OneToOne,
+  BeforeRemove,
 } from 'typeorm';
 import { MinLength, MaxLength } from 'class-validator';
 import { Article } from './artciles';
 import { Document } from './documents';
+
+
 
 @Entity({ name: 'd_file' })
 export class FileUploead extends BaseEntity {
@@ -50,11 +53,14 @@ export class FileUploead extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Article, (article) => article.images)
+  @ManyToOne(() => Article, (article) => article.images, { 
+    onDelete: 'CASCADE' 
+  })
   article: Article;
 
-  @OneToOne(() => Document, (doc) => doc.file)
+  @OneToOne(() => Document, (doc) => doc.file, { 
+    onDelete: 'CASCADE' 
+  })
   document: Document;
-
-
+  
 }

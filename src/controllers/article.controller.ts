@@ -92,9 +92,9 @@ export class ArticleController {
   }
 
   
-  @Delete('/image/:id/:idImage')
+  @Delete('/image/:idImage')
   @UseGuards(JwtAuthenticationGuard)
-  deleteImageByID(@Param('id', ParseIntPipe) id: number,@Param('idImage', ParseIntPipe) idImage: number) {
-    return this.articleService.deleteImage(id,idImage);
+  deleteImageByID(@Param('idImage', ParseIntPipe) idImage: number) {
+    return this.articleService.deleteImage(idImage);
   }
 }
